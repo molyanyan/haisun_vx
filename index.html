@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/costume.css">
+    <title>نمایشگاه مجازی</title>
+
+    <script src="js/babylon.js"></script>
+    <script src="js/babylonjs.loaders.min.js"></script>
+    <script src="js/babylonjs.materials.min.js"></script>
+    <script src="js/pep.js"></script>
+    <script src="js/hand.base.js"></script>
+    <script src="js/hand.css.js"></script>
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="js/functions.js"></script>
+
+</head>
+<body>
+<div id = "holder">
+    <canvas extends="minimal" model="path to model file" id="renderCanvas" touch-action="none"></canvas> <!-- touch-action="none" for best results from PEP -->
+</div>
+<div id="controller">
+    <div style="position: relative;">
+        <div class="w3-left">
+            <img id="mute" src="controller/mute.svg" width="24" height="24" alt="">
+            <img id="play" src="controller/volume.svg" width="24" height="24" alt="">
+        </div>
+        <div class="w3-right">
+            <img id="left" src="controller/left.png" alt="">
+            <img id="right" src="controller/right.png" alt="">
+            <img id="top" src="controller/top.png" alt="">
+            <img id="down" src="controller/down.png" alt="">
+        </div>
+        
+    </div>
+</div>
+<script>
+
+    var interval;
+    const scene_z = 150,
+          scene_x = 250,
+          scene_y = 0,
+          cursorDown = false,
+          yScale = 0.01, 
+          xScale = 0.01,
+          value = 0,
+          oldCamState = { x: 0, y: 0 },
+          cursorState = { x: 0, y: 0 };
+          canvas = document.getElementById("renderCanvas")
+          engine = new BABYLON.Engine(canvas, true);
+    
+
+    const createScene = function () {
+        const scene = new BABYLON.Scene(engine);
+        scene.collisionsEnabled = true;
+        scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
+
+        const ground = buildGround(scene_x*2,scene_z*2,scene);
+        ground.checkCollisions = true;
+
+        const camera = buildCamera(scene_x,scene_z,scene);        
+        const hall_walls = build4Wall(scene_x,scene_z,scene);
+        const hall_lamps = lamps(scene_x,scene_z,scene);
+        const hall_ceiling = ceiling(scene_x,scene_z,scene);
+    
+
+
+
+
+        
+        const green = new BABYLON.StandardMaterial("boxMat");
+        green.diffuseColor = new BABYLON.Color3(39/255, 174/255, 96/255);
+
+        const red = new BABYLON.StandardMaterial("boxMat");
+        red.diffuseColor = new BABYLON.Color3(192/255, 57/255, 43/255);
+
+        const blue = new BABYLON.StandardMaterial("boxMat");
+        blue.diffuseColor = new BABYLON.Color3(52/255, 152/255, 219/255);
+
+        const purple = new BABYLON.StandardMaterial("boxMat");
+        purple.diffuseColor = new BABYLON.Color3(142/255, 68/255, 173/255);
+
+        const teal = new BABYLON.StandardMaterial("boxMat");
+        teal.diffuseColor = new BABYLON.Color3(1/255, 163/255, 164/255);
+
+        const yellow = new BABYLON.StandardMaterial("boxMat");
+        yellow.diffuseColor = new BABYLON.Color3(241/255, 196/255, 15/255);
+
+
+        const blue3 = new BABYLON.StandardMaterial("boxMat");
+        blue3.diffuseColor = new BABYLON.Color3(28/255, 58/255, 150/255);
+
+        const orange = new BABYLON.StandardMaterial("boxMat");
+        orange.diffuseColor = new BABYLON.Color3(230/255, 126/255, 34/255);
+
+        const black = new BABYLON.StandardMaterial("boxMat");
+        black.diffuseColor = new BABYLON.Color3(33/255, 33/255, 33/255);
+
+
+
+
+        const middleBooth = BuildMiddleBooth(scene_x,scene_z,scene,blue);
+
+        const booth_0 = BuildBooth_3_(30,30,scene,green);
+
+        const booth_1 = BuildBooth_1(40,20,scene,yellow);
+        booth_1.translate(new BABYLON.Vector3(20,0,scene_z/2-10), 1, BABYLON.Space.WORLD);
+
+        const booth_2 = BuildBooth_2(40,20,scene,red);
+        booth_2.translate(new BABYLON.Vector3(60,0,scene_z/2-10), 1, BABYLON.Space.WORLD);
+
+        const booth_3 = BuildBooth_3(25,25,20,scene,orange);
+        booth_3.translate(new BABYLON.Vector3(scene_x/2-20,0,scene_z/2-20), 1, BABYLON.Space.WORLD);
+
+        const booth_4 = BuildBooth_4(20,20,scene,blue);
+        booth_4.rotation = new BABYLON.Vector3(0,Math.PI/2,0);
+        booth_4.translate(new BABYLON.Vector3(scene_x/2-10,0,20), 1, BABYLON.Space.WORLD);
+
+
+
+        const booth_5 = BuildBooth_5(20,20,scene,red);
+        booth_5.rotation = new BABYLON.Vector3(0,Math.PI/2,0);
+        booth_5.translate(new BABYLON.Vector3(scene_x/2-10,0,-20), 1, BABYLON.Space.WORLD);
+
+        const booth_6 = BuildBooth_6(25,25,20,scene,blue);
+        booth_6.rotation = new BABYLON.Vector3(0,Math.PI/2,0);
+        booth_6.translate(new BABYLON.Vector3(scene_x/2-20,0,-scene_z/2+20), 1, BABYLON.Space.WORLD);
+
+        const booth_7 = BuildBooth_7(40,20,scene,red);
+        booth_7.rotation = new BABYLON.Vector3(0,Math.PI,0);
+        booth_7.translate(new BABYLON.Vector3(60,0,-scene_z/2+10), 1, BABYLON.Space.WORLD);
+
+        const booth_8 = BuildBooth_8(40,20,scene,green);
+        booth_8.rotation = new BABYLON.Vector3(0,Math.PI,0);
+        booth_8.translate(new BABYLON.Vector3(20,0,-scene_z/2+10), 1, BABYLON.Space.WORLD);
+
+
+
+        const booth_9 = BuildBooth_9(40,20,scene,teal);
+        booth_9.rotation = new BABYLON.Vector3(0,Math.PI,0);
+        booth_9.translate(new BABYLON.Vector3(-20,0,-scene_z/2+10), 1, BABYLON.Space.WORLD);
+
+
+        const booth_10 = BuildBooth_10(40,20,scene,black);
+        booth_10.rotation = new BABYLON.Vector3(0,Math.PI,0);
+        booth_10.translate(new BABYLON.Vector3(-60,0,-scene_z/2+10), 1, BABYLON.Space.WORLD);
+
+        const booth_11 = BuildBooth_11(25,25,20,scene,blue);
+        booth_11.rotation = new BABYLON.Vector3(0,-Math.PI,0);
+        booth_11.translate(new BABYLON.Vector3(-scene_x/2+20,0,-scene_z/2+20), 1, BABYLON.Space.WORLD);
+
+        const booth_12 = BuildBooth_12(20,20,scene,yellow);
+        booth_12.rotation = new BABYLON.Vector3(0,-Math.PI/2,0);
+        booth_12.translate(new BABYLON.Vector3(-scene_x/2+10,0,-20), 1, BABYLON.Space.WORLD);
+
+        const booth_13 = BuildBooth_13(20,20,scene,blue);
+        booth_13.rotation = new BABYLON.Vector3(0,-Math.PI/2,0);
+        booth_13.translate(new BABYLON.Vector3(-scene_x/2+10,0,+20), 1, BABYLON.Space.WORLD);
+
+
+        const booth_14 = BuildBooth_14(25,25,20,scene,yellow);
+        booth_14.rotation = new BABYLON.Vector3(0,-Math.PI/2,0);
+        booth_14.translate(new BABYLON.Vector3(-scene_x/2+20,0,scene_z/2-20), 1, BABYLON.Space.WORLD);
+
+
+        const booth_15 = BuildBooth_15(40,20,scene,blue);
+        booth_15.translate(new BABYLON.Vector3(-60,0,scene_z/2-10), 1, BABYLON.Space.WORLD);
+
+        const booth_16 = BuildBooth_16(40,20,scene,blue3);
+        booth_16.translate(new BABYLON.Vector3(-20,0,scene_z/2-10), 1, BABYLON.Space.WORLD);
+
+
+	
+        scene.actionManager = new BABYLON.ActionManager(scene);
+
+        //showWorldAxis(10,scene);
+        $(document).ready(function(){
+            var audioElement = document.createElement('audio');
+            audioElement.setAttribute('src', 'sounds/a.ogg');
+            $("#play").click(function () {
+                console.log("play");
+                audioElement.play();
+            });
+            $("#mute").click(function () {
+                console.log("mute");
+                audioElement.pause();
+            });
+        });
+        return scene;
+    }
+
+    const scene = createScene(); 
+    engine.runRenderLoop(function () {
+        scene.render();
+    });
+    window.addEventListener("resize", function () {
+        engine.resize();
+    });
+</script>
+
+
+</body>
+</html>
